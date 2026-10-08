@@ -1,0 +1,4 @@
+---
+teleport_service: 'teleport'
+teleport_package: 'teleport'
+teleport_dest: '/etc'

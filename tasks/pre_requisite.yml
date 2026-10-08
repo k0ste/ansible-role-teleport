@@ -1,0 +1,46 @@
+---
+- name: "teleport | Assert that ansible facts gathered successfully"
+  ansible.builtin.assert:
+    that:
+      - "hostvars[inventory_hostname]['ansible_facts']['service_mgr'] is
+        defined"
+    fail_msg: "'ansible_facts' not found. Please enable facts gathering"
+    quiet: "true"
+- name: "teleport | Assert that system manager is systemd"
+  ansible.builtin.assert:
+    that:
+      - "hostvars[inventory_hostname]['ansible_facts']['service_mgr'] ==
+        'systemd'"
+    fail_msg: "System manager is not systemd"
+    quiet: "true"
+- name: "teleport | Add the OS specific variables"
+  ansible.builtin.include_vars:
+    file: "{{ hostvars[inventory_hostname]['ansible_facts']['os_family'] +
+      '.yml' }}"
+- name: "teleport | Set facts about teleport role"
+  ansible.builtin.set_fact:
+    _teleport_settings: "{{ lookup('ansible.builtin.vars', 'teleport') |
+      community.general.json_query('[].settings | [0]') }}"
+    _teleport_package_state: "{{ lookup('ansible.builtin.vars', 'teleport') |
+      community.general.json_query('[].package_state | [0]') }}"
+  when:
+    - "lookup('ansible.builtin.vars', 'teleport', default='')
+      not in ['', [], '[]', None]"
+- name: "teleport | Assert that teleport package state in valid value"
+  ansible.builtin.assert:
+    that:
+      - "lookup('ansible.builtin.vars', '_teleport_package_state') in
+        ['present', 'latest']"
+    fail_msg: "{{ 'package_state must be in `present` or `latest`,
+      current is: ' + lookup('ansible.builtin.vars',
+      '_teleport_package_state') }}"
+    quiet: "true"
+  when:
+    - "lookup('ansible.builtin.vars', '_teleport_package_state',
+      default='') not in ['', [], '[]', None, 'present', 'latest']"
+- name: "teleport | Set package state to 'present' cause value is not defined"
+  ansible.builtin.set_fact:
+    _teleport_package_state: "present"
+  when:
+    - "lookup('ansible.builtin.vars', '_teleport_package_state',
+      default='') in ['', [], '[]', None]"

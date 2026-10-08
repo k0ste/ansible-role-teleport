@@ -1,0 +1,35 @@
+---
+- name: "teleport | Install the required packages in Redhat derivatives"
+  when:
+    - "hostvars[inventory_hostname]['ansible_facts']['os_family'] == 'RedHat'"
+  block:
+    - name: "teleport | Update dnf cache"
+      ansible.builtin.dnf:
+        update_cache: "yes"
+    - name: "teleport | Install package with dnf"
+      ansible.builtin.dnf:
+        name: "{{ lookup('ansible.builtin.vars', 'teleport_package') }}"
+        state: "{{ lookup('ansible.builtin.vars', '_teleport_package_state') }}"
+- name: "teleport | Install the required packages in Debian derivatives"
+  when:
+    - "hostvars[inventory_hostname]['ansible_facts']['os_family'] == 'Debian'"
+  block:
+    - name: "teleport | Update apt cache"
+      ansible.builtin.apt:
+        update_cache: "yes"
+    - name: "teleport | Install package with apt"
+      ansible.builtin.apt:
+        name: "{{ lookup('ansible.builtin.vars', 'teleport_package') }}"
+        state: "{{ lookup('ansible.builtin.vars', '_teleport_package_state') }}"
+- name: "teleport | Install the required packages in ArchLinux derivatives"
+  when:
+    - "hostvars[inventory_hostname]['ansible_facts']['os_family'] ==
+      'Archlinux'"
+  block:
+    - name: "teleport | Update pacman cache"
+      community.general.pacman:
+        update_cache: "yes"
+    - name: "teleport | Install package with pacman"
+      community.general.pacman:
+        name: "{{ lookup('ansible.builtin.vars', 'teleport_package') }}"
+        state: "{{ lookup('ansible.builtin.vars', '_teleport_package_state') }}"

@@ -1,0 +1,6 @@
+{{ '## teleport.yaml' }}
+{{ '# ' + ansible_managed }}
+{{ '# Do not edit manually' }}
+
+{{ lookup('ansible.builtin.vars', '_teleport_settings') |
+  ansible.builtin.to_nice_yaml(indent=2, explicit_start=True) }}

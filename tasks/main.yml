@@ -1,0 +1,21 @@
+---
+- name: "teleport | Include pre requisite tasks"
+  ansible.builtin.import_tasks:
+    file: "pre_requisite.yml"
+- name: "teleport | Include packages tasks"
+  ansible.builtin.include_tasks:
+    file: "packages.yml"
+  when:
+    - "lookup('ansible.builtin.vars', 'teleport', default='')
+      not in ['', [], '[]', None]"
+    - "lookup('ansible.builtin.vars', 'teleport') |
+       community.general.json_query(lookup('ansible.builtin.vars',
+      '_teleport_install_package', default='')) == 'true'"
+  vars:
+    _teleport_install_package: "[] | map(&install_package || 'false', @) | [0]"
+- name: "teleport | Include deployment tasks"
+  ansible.builtin.include_tasks:
+    file: "deploy.yml"
+  when:
+    - "lookup('ansible.builtin.vars', '_teleport_settings', default='')
+      not in ['', [], '[]', None]"
